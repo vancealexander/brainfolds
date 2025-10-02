@@ -3,13 +3,37 @@ import pyvista as pv
 from pyvistaqt import BackgroundPlotter
 import time
 from skimage.measure import marching_cubes
+import nibabel as nib  # For loading NIfTI files
+from scipy.ndimage import zoom  # For resizing atlas data
+from skimage.transform import resize  # Fallback for resizing
+
+# Define grid size first
+n_points = 60  # High resolution for detailed folds [Hofman, 1991]
+
+# Load fetal head atlas for realistic constraint
+atlas_file = 'atlas/fetal-t2w-head-atlas.nii'  # Path to the downloaded file in subfolder 'atlas'
+atlas = nib.load(atlas_file)
+atlas_data = atlas.get_fdata()  # 3D array of intensities
+
+# Compute mean along axis=2
+atlas_mean = atlas_data.mean(axis=2)  # Mean along z-axis for 2D projection
+
+# Resize atlas_mean to match the grid size (n_points x n_points)
+# Calculate zoom factors to scale to n_points x n_points
+zoom_factor_x = n_points / atlas_mean.shape[0]
+zoom_factor_y = n_points / atlas_mean.shape[1]
+atlas_mean_resized = zoom(atlas_mean, (zoom_factor_x, zoom_factor_y))  # Resize using zoom factors
+
+# Ensure the resized array matches n_points x n_points (trim or pad if necessary)
+if atlas_mean_resized.shape != (n_points, n_points):
+    atlas_mean_resized = resize(atlas_mean_resized, (n_points, n_points), order=1, mode='constant', cval=0, anti_aliasing=True)
 
 # Initialize a 2D grid with layered structure
-n_points = 60  # High resolution for detailed folds [Hofman, 1991]
 x = np.linspace(-1, 1, n_points)
 y = np.linspace(-1, 1, n_points)
 X, Y = np.meshgrid(x, y)
-Z_outer = np.zeros_like(X)  # Outer cortical layer
+Z_outer = np.interp(atlas_mean_resized.ravel(), (atlas_mean_resized.min(), atlas_mean_resized.max()), (0, 0.5))  # Normalize atlas to initial Z range
+Z_outer = Z_outer.reshape(n_points, n_points)  # Reshape to match X, Y
 Z_inner = np.zeros_like(X)  # Inner white matter layer (slower growth)
 
 # Create a StructuredGrid for the outer layer
@@ -18,8 +42,8 @@ plotter = BackgroundPlotter()
 actor = plotter.add_mesh(grid, cmap='viridis', show_edges=True)
 
 # Simulation parameters
-# sphere_radius: Represents the skull constraint limiting cortical growth [Pirkowski, 2025]
-sphere_radius = 1.5
+# sphere_radius: Represents the skull constraint, now modified by atlas for realism [Pirkowski, 2025]
+sphere_radius = 1.5 + 0.1 * atlas_mean_resized.mean()  # Adjust base radius with atlas data
 # max_growth_rate_outer: Faster growth for outer cortex, reflecting progenitor cell proliferation [Cao et al., 2017]
 max_growth_rate_outer = 0.1
 # max_growth_rate_inner: Slower growth for inner layer, part of differential tangential growth (DTG) [Budday et al., 2015]
@@ -60,7 +84,9 @@ for t in range(150):  # Increased steps to model gradual fetal development [Cao 
     # Enforce spherical constraint with dynamic pressure
     # mask: Identifies points exceeding the boundary, mimicking skull limit [Pirkowski, 2025]
     # Pressure increase simulates developmental constraint [Budday et al., 2015]
-    mask = np.sqrt(X**2 + Y**2 + Z_outer_new**2) > sphere_radius - pressure_increase * (t / 150)
+    # Modify mask with atlas data for non-spherical, realistic skull shape
+    atlas_constraint = atlas_mean_resized / atlas_mean_resized.max()  # Normalize resized atlas for constraint
+    mask = np.sqrt(X**2 + Y**2 + Z_outer_new**2) > sphere_radius - pressure_increase * (t / 150) + 0.2 * atlas_constraint
     Z_outer_new[mask] = (sphere_radius - pressure_increase * (t / 150)) * Z_outer[mask] / np.sqrt(X[mask]**2 + Y[mask]**2 + Z_outer[mask]**2)
     
     Z_outer = Z_outer_new
