@@ -13,6 +13,21 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## License
+
+This software is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to:Share — copy and redistribute the material in any medium or format.
+Adapt — remix, transform, and build upon the material for any purpose, even commercially.
+
+Under the following terms:
+
+Attribution: You must give appropriate credit to the author, Vance Alexander (ORCID: https://orcid.org/0000-0002-0232-1428), provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+
+No additional restrictions: You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+For the full legal text, see the LICENSE file included in this repository.
+
+
+
 ## References
 
 - Budday, S., Steinmann, P., Goriely, A., & Kuhl, E. (2015). Size and curvature regulate pattern selection in the mammalian brain. Extreme Mechanics Letters, 4, 193–198. doi: [10.1016/j.eml.2015.05.006](https://doi.org/10.1016/j.eml.2015.05.006)  
