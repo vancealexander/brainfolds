@@ -20,3 +20,5 @@ python main.py
 - Hofman, M.A. (1991). The fractal geometry of convoluted brains. Journal of Hirnforschung, 32(1), 103–111.  
 - Leyva-Mendivil, M. F., Page, A., Bressloff, N. W., & Limbert, G. (2020). A mechanistic insight into the mechanical role of the stratum corneum during stretching and compression of the skin. Journal of the Mechanical Behavior of Biomedical Materials, 102, 103522. doi: [10.1016/j.jmbbm.2019.103522](https://doi.org/10.1016/j.jmbbm.2019.103522)  
 - Pirkowski, M. (2025). Gyrification as a space-filling curve in brain and cabbage development. Retrieved from [https://twitter.com/MattPirkowski/status/1973083523369042219](https://twitter.com/MattPirkowski/status/1973083523369042219)
+- Matthew, J et al. (2024) Craniofacial phenotyping with fetal MRI: A feasibility study of 3D visualisation, segmentation, surface-rendered and physical models. BMC Med Imaging 24, 52. doi: [10.1186/s12880-024-01230-7]
+- 3D fetal MRI atlas repository: (https://gin.g-node.org/kcl_cdb/craniofacial_fetal_mri_atlas)

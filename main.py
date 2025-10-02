@@ -1,3 +1,14 @@
+# brainfolds
+# PyVista simulation of gyrification process, modeling the formation of gyri and sulci in brain development.
+#
+# License: This software is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+#          You are free to use, modify, and distribute this software, provided you give appropriate credit to the
+#          author, Vance Alexander (ORCID: https://orcid.org/0000-0002-0232-1428), in any publications or derivatives.
+#          See the LICENSE file for full details: https://creativecommons.org/licenses/by/4.0/
+#
+# Author: Vance Alexander
+# ORCID: https://orcid.org/0000-0002-0232-1428
+
 import numpy as np
 import pyvista as pv
 from pyvistaqt import BackgroundPlotter
@@ -42,7 +53,7 @@ plotter = BackgroundPlotter()
 actor = plotter.add_mesh(grid, cmap='viridis', show_edges=True)
 
 # Simulation parameters
-# sphere_radius: Represents the skull constraint, now modified by atlas for realism [Pirkowski, 2025]
+# sphere_radius: Represents the skull constraint, now based on fetal MRI atlas [Matthew et al., 2024]
 sphere_radius = 1.5 + 0.1 * atlas_mean_resized.mean()  # Adjust base radius with atlas data
 # max_growth_rate_outer: Faster growth for outer cortex, reflecting progenitor cell proliferation [Cao et al., 2017]
 max_growth_rate_outer = 0.1
@@ -50,7 +61,7 @@ max_growth_rate_outer = 0.1
 max_growth_rate_inner = 0.06
 # fold_strength_base: Base intensity of folding, influenced by genetic and mechanical factors [Leyva-Mendivil et al., 2020]
 fold_strength_base = 0.04
-# pressure_increase: Simulates increasing skull pressure over development [Pirkowski, 2025]
+# pressure_increase: Simulates increasing skull pressure over development [Matthew et al., 2024]
 pressure_increase = 0.015
 
 # Initial perturbations and genetic variability
@@ -82,9 +93,9 @@ for t in range(150):  # Increased steps to model gradual fetal development [Cao 
     Z_outer_new += 0.02 * np.cos(15 * X) * np.sin(15 * Y) * np.exp(-t / 150)
     
     # Enforce spherical constraint with dynamic pressure
-    # mask: Identifies points exceeding the boundary, mimicking skull limit [Pirkowski, 2025]
+    # mask: Identifies points exceeding the boundary, mimicking skull limit [Matthew et al., 2024]
     # Pressure increase simulates developmental constraint [Budday et al., 2015]
-    # Modify mask with atlas data for non-spherical, realistic skull shape
+    # Modify mask with atlas data for non-spherical, realistic skull shape, inspired by space-filling curve concept [Pirkowski, 2025]
     atlas_constraint = atlas_mean_resized / atlas_mean_resized.max()  # Normalize resized atlas for constraint
     mask = np.sqrt(X**2 + Y**2 + Z_outer_new**2) > sphere_radius - pressure_increase * (t / 150) + 0.2 * atlas_constraint
     Z_outer_new[mask] = (sphere_radius - pressure_increase * (t / 150)) * Z_outer[mask] / np.sqrt(X[mask]**2 + Y[mask]**2 + Z_outer[mask]**2)
